@@ -1,14 +1,12 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
-require_once __DIR__ . '/../models/Product.php';
-require_once __DIR__ . '/../models/Category.php';
+require_once __DIR__ . '/../models/Banner.php';
 
 $auth = new Auth();
 $auth->requireAdmin();
 
-$productModel = new Product();
-$categoryModel = new Category();
+$bannerModel = new Banner();
 $currentUser = $auth->getCurrentUser();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
@@ -16,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     
     try {
         // Create upload directories if they don't exist
-        $uploadDir = __DIR__ . '/../assets/images/products/';
-        $publicDir = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/products/';
+        $uploadDir = __DIR__ . '/../assets/images/banners/';
+        $publicDir = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/banners/';
         
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
@@ -47,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
         
         // Try to save to the project directory first
         $filePath = $uploadDir . $fileName;
-        $webPath = '/assets/images/products/' . $fileName;
+        $webPath = '/assets/images/banners/' . $fileName;
         
         if (move_uploaded_file($file['tmp_name'], $filePath)) {
             // Also copy to public directory if it's different
@@ -57,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
             
             // Verify file was saved
             if (file_exists($filePath)) {
-                error_log("Product Upload: File saved successfully at " . $filePath);
+                error_log("Banner Upload: File saved successfully at " . $filePath);
                 echo json_encode([
                     'success' => true, 
                     'path' => $webPath,
@@ -70,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
             throw new Exception('Failed to move uploaded file');
         }
     } catch (Exception $e) {
-        error_log("Product Upload Error: " . $e->getMessage());
+        error_log("Banner Upload Error: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => 'Upload error: ' . $e->getMessage()]);
     }
     exit;
@@ -84,72 +82,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'create':
                 $data = [
-                    'name' => $_POST['name'] ?? '',
-                    'slug' => $_POST['slug'] ?? '',
-                    'description' => $_POST['description'] ?? '',
-                    'price' => $_POST['price'] ?? 0,
-                    'category_id' => $_POST['category_id'] ?? 0,
-                    'sku' => $_POST['sku'] ?? '',
-                    'stock' => $_POST['stock'] ?? 0,
+                    'image' => $_POST['image'] ?? '',
                     'status' => $_POST['status'] ?? 'active',
-                    'featured' => isset($_POST['featured']) ? 1 : 0,
-                    'images' => $_POST['images'] ?? '',
-                    'fabric' => $_POST['fabric'] ?? '',
-                    'occasion' => $_POST['occasion'] ?? '',
-                    'care_instructions' => $_POST['care_instructions'] ?? '',
-                    'sizes' => $_POST['sizes'] ?? ''
+                    'sort_order' => $_POST['sort_order'] ?? 999
                 ];
                 
-                if (empty($data['images'])) {
-                    echo json_encode(['success' => false, 'message' => 'Product image is required']);
+                // Validate image path
+                if (empty($data['image'])) {
+                    echo json_encode(['success' => false, 'message' => 'Image is required']);
                     break;
                 }
                 
                 // Verify image file exists
-                $imagePath = $_SERVER['DOCUMENT_ROOT'] . $data['images'];
-                $altImagePath = __DIR__ . '/../' . ltrim($data['images'], '/');
+                $imagePath = $_SERVER['DOCUMENT_ROOT'] . $data['image'];
+                $altImagePath = __DIR__ . '/../' . ltrim($data['image'], '/');
                 
                 if (!file_exists($imagePath) && !file_exists($altImagePath)) {
-                    error_log("Product Create: Image file not found at " . $imagePath . " or " . $altImagePath);
+                    error_log("Banner Create: Image file not found at " . $imagePath . " or " . $altImagePath);
                     echo json_encode(['success' => false, 'message' => 'Image file not found. Please re-upload the image.']);
                     break;
                 }
                 
-                $result = $productModel->create($data);
+                $result = $bannerModel->create($data);
                 echo json_encode($result);
                 break;
                 
             case 'update':
                 $id = $_POST['id'] ?? 0;
                 $data = [
-                    'name' => $_POST['name'] ?? '',
-                    'slug' => $_POST['slug'] ?? '',
-                    'description' => $_POST['description'] ?? '',
-                    'price' => $_POST['price'] ?? 0,
-                    'category_id' => $_POST['category_id'] ?? 0,
-                    'sku' => $_POST['sku'] ?? '',
-                    'stock' => $_POST['stock'] ?? 0,
+                    'image' => $_POST['image'] ?? '',
                     'status' => $_POST['status'] ?? 'active',
-                    'featured' => isset($_POST['featured']) ? 1 : 0,
-                    'images' => $_POST['images'] ?? '',
-                    'fabric' => $_POST['fabric'] ?? '',
-                    'occasion' => $_POST['occasion'] ?? '',
-                    'care_instructions' => $_POST['care_instructions'] ?? '',
-                    'sizes' => $_POST['sizes'] ?? ''
+                    'sort_order' => $_POST['sort_order'] ?? 999
                 ];
                 
-                if (empty($data['images'])) {
-                    echo json_encode(['success' => false, 'message' => 'Product image is required']);
+                // Validate image path
+                if (empty($data['image'])) {
+                    echo json_encode(['success' => false, 'message' => 'Image is required']);
                     break;
                 }
                 
-                $result = $productModel->update($id, $data);
+                $result = $bannerModel->update($id, $data);
                 echo json_encode($result);
                 break;
                 
             case 'delete':
                 $id = $_POST['id'] ?? 0;
-                $result = $productModel->delete($id);
+                $result = $bannerModel->delete($id);
+                echo json_encode($result);
+                break;
+                
+            case 'update_order':
+                $bannerIds = json_decode($_POST['banner_ids'] ?? '[]', true);
+                $result = $bannerModel->updateSortOrder($bannerIds);
                 echo json_encode($result);
                 break;
                 
@@ -158,32 +142,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
         }
     } catch (Exception $e) {
+        error_log("Banner Action Error: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
     }
     exit;
 }
 
-// Get products and categories
-$products = $productModel->getAll();
-$categories = $categoryModel->getAll();
+// Get banners
+$banners = $bannerModel->getAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - Admin Panel</title>
+    <title>Banner Management - Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/admin.css">
-    <!-- Added styles for product image upload -->
     <style>
-        .product-preview {
+        .banner-preview {
             width: 150px;
             height: 90px;
             object-fit: cover;
             border-radius: 8px;
             border: 1px solid #ddd;
+        }
+        .sortable-row {
+            cursor: move;
+        }
+        .sortable-row:hover {
+            background-color: #f8f9fa;
         }
         .image-upload-area {
             border: 2px dashed #ddd;
@@ -209,6 +198,14 @@ $categories = $categoryModel->getAll();
             font-style: italic;
             font-size: 0.9em;
         }
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-inactive {
+            color: #6c757d;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -223,11 +220,11 @@ $categories = $categoryModel->getAll();
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
-                                <h1 class="page-title">Products</h1>
-                                <p class="page-subtitle">Manage your product catalog</p>
+                                <h1 class="page-title">Banner Management</h1>
+                                <p class="page-subtitle">Manage homepage banner slider images</p>
                             </div>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                                <i class="fas fa-plus"></i> Add Product
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bannerModal">
+                                <i class="fas fa-plus"></i> Add Banner
                             </button>
                         </div>
                     </div>
@@ -237,81 +234,63 @@ $categories = $categoryModel->getAll();
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title">All Products</h5>
-                                <!-- <div class="search-box">
-                                    <i class="fas fa-search"></i>
-                                    <input type="text" class="form-control search-input" placeholder="Search products...">
-                                </div> -->
+                                <h5 class="card-title">All Banners</h5>
+                                <small class="text-muted">Drag and drop rows to reorder banners</small>
                             </div>
                             <div class="card-body">
+                                <?php if (empty($banners)): ?>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> No banners found. Add your first banner to get started.
+                                    </div>
+                                <?php else: ?>
                                 <div class="table-responsive">
-                                    <table class="table table-hover">
+                                    <table class="table table-hover" id="bannersTable">
                                         <thead>
                                             <tr>
-                                                <th>Product</th>
-                                                <th>Category</th>
-                                                <th>Price</th>
-                                                <th>Stock</th>
+                                                <th width="50">Order</th>
+                                                <th width="180">Preview</th>
+                                                <!-- <th>Image Path</th> -->
                                                 <th>Status</th>
-                                                <th>Featured</th>
                                                 <th>Created</th>
-                                                <th>Actions</th>
+                                                <th width="120">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <?php foreach ($products as $product): 
-                                                $category = null;
-                                                foreach ($categories as $cat) {
-                                                    if ($cat['id'] == $product['category_id']) {
-                                                        $category = $cat;
-                                                        break;
-                                                    }
-                                                }
-                                            ?>
-                                            <tr>
+                                        <tbody id="sortableBanners">
+                                            <?php foreach ($banners as $banner): ?>
+                                            <tr class="sortable-row" data-id="<?php echo $banner['id']; ?>">
                                                 <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="<?php echo htmlspecialchars($product['images']); ?>" 
-                                                             alt="Product" class="product-thumb me-3"
-                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                                        <div class="image-error" style="display: none;">
-                                                            <i class="fas fa-exclamation-triangle"></i> Image not found
-                                                        </div>
-                                                        <div>
-                                                            <div class="fw-bold"><?php echo htmlspecialchars($product['name']); ?></div>
-                                                            <small class="text-muted"><?php echo htmlspecialchars($product['sku']); ?></small>
-                                                        </div>
+                                                    <i class="fas fa-grip-vertical text-muted"></i>
+                                                    <?php echo $banner['sort_order']; ?>
+                                                </td>
+                                                <td>
+                                                    <img src="<?php echo htmlspecialchars($banner['image']); ?>" 
+                                                         alt="Banner Preview" 
+                                                         class="banner-preview"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                    <div class="image-error" style="display: none;">
+                                                        <i class="fas fa-exclamation-triangle"></i> Image not found
                                                     </div>
                                                 </td>
-                                                <td><?php echo $category ? htmlspecialchars($category['name']) : 'N/A'; ?></td>
-                                                <td>₹<?php echo number_format($product['price'], 2); ?></td>
+                                                <!-- <td>
+                                                    <div class="fw-bold"><?php echo htmlspecialchars($banner['image']); ?></div>
+                                                </td> -->
                                                 <td>
-                                                    <span class="badge bg-<?php echo $product['stock'] > 0 ? 'success' : 'danger'; ?>">
-                                                        <?php echo $product['stock']; ?>
+                                                    <span class="badge bg-<?php echo $banner['status'] === 'active' ? 'success' : 'secondary'; ?>">
+                                                        <?php echo ucfirst($banner['status']); ?>
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <span class="badge bg-<?php echo $product['status'] === 'active' ? 'success' : 'secondary'; ?>">
-                                                        <?php echo ucfirst($product['status']); ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <?php if ($product['featured']): ?>
-                                                        <i class="fas fa-star text-warning"></i>
-                                                    <?php else: ?>
-                                                        <i class="far fa-star text-muted"></i>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td><?php echo date('M j, Y', strtotime($product['created_at'])); ?></td>
+                                                <td><?php echo date('M j, Y', strtotime($banner['created_at'])); ?></td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm">
-                                                        <button class="btn btn-outline-primary edit-product" 
-                                                                data-product='<?php echo json_encode($product); ?>'>
+                                                        <button class="btn btn-outline-primary edit-banner" 
+                                                                data-id="<?php echo $banner['id']; ?>"
+                                                                data-image="<?php echo htmlspecialchars($banner['image']); ?>"
+                                                                data-status="<?php echo $banner['status']; ?>"
+                                                                data-sort-order="<?php echo $banner['sort_order']; ?>">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-outline-danger delete-product" 
-                                                                data-id="<?php echo $product['id']; ?>"
-                                                                data-name="<?php echo htmlspecialchars($product['name']); ?>">
+                                                        <button class="btn btn-outline-danger delete-banner" 
+                                                                data-id="<?php echo $banner['id']; ?>">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -321,6 +300,7 @@ $categories = $categoryModel->getAll();
                                         </tbody>
                                     </table>
                                 </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -329,102 +309,26 @@ $categories = $categoryModel->getAll();
         </div>
     </div>
     
-    <!-- Product Modal -->
-    <div class="modal fade" id="productModal" tabindex="-1">
+    <!-- Banner Modal -->
+    <div class="modal fade" id="bannerModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Product</h5>
+                    <h5 class="modal-title">Add Banner</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="productForm" action="products.php" method="POST" data-ajax="true">
+                <form id="bannerForm" action="banners.php" method="POST">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="create">
                         <input type="hidden" name="id" value="">
-                        <input type="hidden" name="images" value="">
+                        <input type="hidden" name="image" value="">
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Product Name *</label>
-                                    <input type="text" class="form-control" name="name" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="slug" class="form-label">Slug *</label>
-                                    <input type="text" class="form-control" name="slug" required>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" name="description" rows="3"></textarea>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="price" class="form-label">Price *</label>
-                                    <input type="number" class="form-control" name="price" step="0.01" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="category_id" class="form-label">Category *</label>
-                                    <select class="form-control" name="category_id" required>
-                                        <option value="">Select Category</option>
-                                        <?php foreach ($categories as $category): ?>
-                                        <option value="<?php echo $category['id']; ?>">
-                                            <?php echo htmlspecialchars($category['name']); ?>
-                                        </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="sku" class="form-label">SKU</label>
-                                    <input type="text" class="form-control" name="sku">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="stock" class="form-label">Stock</label>
-                                    <input type="number" class="form-control" name="stock" value="0">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-control" name="status">
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <div class="form-check mt-4">
-                                        <input class="form-check-input" type="checkbox" name="featured" id="featured">
-                                        <label class="form-check-label" for="featured">
-                                            Featured Product
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Replaced URL input with drag-and-drop file upload -->
+                        <!-- Image upload section -->
                         <div class="mb-4">
-                            <label class="form-label">Product Image * <small class="text-muted">(Recommended: 800x800px, Max: 5MB)</small></label>
+                            <label class="form-label">Banner Image * <small class="text-muted">(Recommended: 1200x400px, Max: 5MB)</small></label>
                             <div class="image-upload-area" id="imageUploadArea">
                                 <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                                <h5>Drop your product image here</h5>
+                                <h5>Drop your banner image here</h5>
                                 <p class="text-muted">or click to browse files</p>
                                 <input type="file" id="imageInput" accept="image/*" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary" id="chooseFileBtn">
@@ -432,7 +336,7 @@ $categories = $categoryModel->getAll();
                                 </button>
                             </div>
                             <div id="imagePreview" class="mt-3" style="display: none;">
-                                <img id="previewImg" src="/placeholder.svg" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+                                <img id="previewImg" src="" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
                                 <br>
                                 <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImage()">
                                     <i class="fas fa-trash"></i> Remove
@@ -444,37 +348,25 @@ $categories = $categoryModel->getAll();
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="fabric" class="form-label">Fabric</label>
-                                    <input type="text" class="form-control" name="fabric">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-control" name="status">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="occasion" class="form-label">Occasion</label>
-                                    <input type="text" class="form-control" name="occasion">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="care_instructions" class="form-label">Care Instructions</label>
-                                    <input type="text" class="form-control" name="care_instructions">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="sizes" class="form-label">Available Sizes</label>
-                                    <input type="text" class="form-control" name="sizes" placeholder="S,M,L,XL,XXL">
-                                    <div class="form-text">Comma-separated values</div>
+                                    <label for="sort_order" class="form-label">Sort Order</label>
+                                    <input type="number" class="form-control" name="sort_order" value="999" min="1">
+                                    <div class="form-text">Lower numbers appear first</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">Save Product</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Save Banner</button>
                     </div>
                 </form>
             </div>
@@ -482,12 +374,12 @@ $categories = $categoryModel->getAll();
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const productModal = document.getElementById('productModal');
-            const productForm = document.getElementById('productForm');
-            const modalTitle = productModal.querySelector('.modal-title');
+            const bannerModal = document.getElementById('bannerModal');
+            const bannerForm = document.getElementById('bannerForm');
+            const modalTitle = bannerModal.querySelector('.modal-title');
             const imageInput = document.getElementById('imageInput');
             const imageUploadArea = document.getElementById('imageUploadArea');
             const imagePreview = document.getElementById('imagePreview');
@@ -496,6 +388,7 @@ $categories = $categoryModel->getAll();
             const uploadStatus = document.getElementById('uploadStatus');
             const submitBtn = document.getElementById('submitBtn');
             
+            // Click events for file selection
             chooseFileBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -513,6 +406,7 @@ $categories = $categoryModel->getAll();
                 }
             });
             
+            // Drag and drop events
             imageUploadArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -535,6 +429,7 @@ $categories = $categoryModel->getAll();
                 }
             });
             
+            // File input change event
             imageInput.addEventListener('change', function(e) {
                 if (e.target.files.length > 0) {
                     handleImageUpload(e.target.files[0]);
@@ -578,7 +473,7 @@ $categories = $categoryModel->getAll();
                 const formData = new FormData();
                 formData.append('image', file);
                 
-                fetch('products.php', {
+                fetch('banners.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -591,7 +486,7 @@ $categories = $categoryModel->getAll();
                 .then(data => {
                     console.log('Upload result:', data);
                     if (data.success) {
-                        productForm.querySelector('input[name="images"]').value = data.path;
+                        bannerForm.querySelector('input[name="image"]').value = data.path;
                         showUploadStatus('Image uploaded successfully!', 'success');
                         
                         // Enable submit button
@@ -620,7 +515,7 @@ $categories = $categoryModel->getAll();
             function resetUploadArea() {
                 imageUploadArea.innerHTML = `
                     <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                    <h5>Drop your product image here</h5>
+                    <h5>Drop your banner image here</h5>
                     <p class="text-muted">or click to browse files</p>
                     <button type="button" class="btn btn-outline-primary" id="chooseFileBtn">
                         Choose File
@@ -644,59 +539,129 @@ $categories = $categoryModel->getAll();
                 }
             }
             
+            // Global function to remove image
             window.removeImage = function() {
-                productForm.querySelector('input[name="images"]').value = '';
+                bannerForm.querySelector('input[name="image"]').value = '';
                 imagePreview.style.display = 'none';
                 resetUploadArea();
                 imageInput.value = '';
             };
             
-            // Edit product
-            document.querySelectorAll('.edit-product').forEach(button => {
+            // Form submission
+            bannerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const imageValue = this.querySelector('input[name="image"]').value;
+                
+                if (!imageValue) {
+                    showAlert('Please upload a banner image first', 'danger');
+                    return;
+                }
+                
+                if (submitBtn.disabled) {
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                const originalText = submitBtn.innerHTML;
+                
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                submitBtn.disabled = true;
+                
+                console.log('Submitting form with image path:', imageValue);
+                
+                fetch('banners.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Form submission result:', data);
+                    if (data.success) {
+                        showAlert(data.message || 'Banner saved successfully!', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showAlert(data.message || 'Failed to save banner', 'danger');
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Form submission error:', error);
+                    showAlert('An error occurred. Please try again.', 'danger');
+                    submitBtn.disabled = false;
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                });
+            });
+
+            // Initialize sortable
+            if (document.getElementById('sortableBanners')) {
+                const sortable = Sortable.create(document.getElementById('sortableBanners'), {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function(evt) {
+                        const bannerIds = Array.from(evt.to.children).map(row => row.dataset.id);
+                        
+                        const formData = new FormData();
+                        formData.append('action', 'update_order');
+                        formData.append('banner_ids', JSON.stringify(bannerIds));
+                        
+                        fetch('banners.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showAlert(data.message, 'success');
+                                setTimeout(() => location.reload(), 1000);
+                            } else {
+                                showAlert(data.message, 'danger');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showAlert('An error occurred while updating order.', 'danger');
+                        });
+                    }
+                });
+            }
+            
+            // Edit banner
+            document.querySelectorAll('.edit-banner').forEach(button => {
                 button.addEventListener('click', function() {
-                    const product = JSON.parse(this.dataset.product);
+                    const data = this.dataset;
                     
-                    modalTitle.textContent = 'Edit Product';
-                    productForm.querySelector('input[name="action"]').value = 'update';
-                    productForm.querySelector('input[name="id"]').value = product.id;
-                    productForm.querySelector('input[name="name"]').value = product.name;
-                    productForm.querySelector('input[name="slug"]').value = product.slug;
-                    productForm.querySelector('textarea[name="description"]').value = product.description;
-                    productForm.querySelector('input[name="price"]').value = product.price;
-                    productForm.querySelector('select[name="category_id"]').value = product.category_id;
-                    productForm.querySelector('input[name="sku"]').value = product.sku;
-                    productForm.querySelector('input[name="stock"]').value = product.stock;
-                    productForm.querySelector('select[name="status"]').value = product.status;
-                    productForm.querySelector('input[name="featured"]').checked = product.featured == 1;
-                    productForm.querySelector('input[name="images"]').value = product.images;
-                    productForm.querySelector('input[name="fabric"]').value = product.fabric;
-                    productForm.querySelector('input[name="occasion"]').value = product.occasion;
-                    productForm.querySelector('input[name="care_instructions"]').value = product.care_instructions;
-                    productForm.querySelector('input[name="sizes"]').value = product.sizes;
+                    modalTitle.textContent = 'Edit Banner';
+                    bannerForm.querySelector('input[name="action"]').value = 'update';
+                    bannerForm.querySelector('input[name="id"]').value = data.id;
+                    bannerForm.querySelector('input[name="image"]').value = data.image;
+                    bannerForm.querySelector('select[name="status"]').value = data.status;
+                    bannerForm.querySelector('input[name="sort_order"]').value = data.sortOrder;
                     
-                    if (product.images) {
-                        previewImg.src = product.images;
+                    if (data.image) {
+                        previewImg.src = data.image;
                         imagePreview.style.display = 'block';
                         imageUploadArea.style.display = 'none';
                         submitBtn.disabled = false;
                     }
                     
-                    new bootstrap.Modal(productModal).show();
+                    new bootstrap.Modal(bannerModal).show();
                 });
             });
             
-            // Delete product
-            document.querySelectorAll('.delete-product').forEach(button => {
+            // Delete banner
+            document.querySelectorAll('.delete-banner').forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.dataset.id;
-                    const name = this.dataset.name;
                     
-                    if (confirm(`Are you sure you want to delete "${name}"?`)) {
+                    if (confirm('Are you sure you want to delete this banner?')) {
                         const formData = new FormData();
                         formData.append('action', 'delete');
                         formData.append('id', id);
                         
-                        fetch('products.php', {
+                        fetch('banners.php', {
                             method: 'POST',
                             body: formData
                         })
@@ -718,17 +683,34 @@ $categories = $categoryModel->getAll();
             });
             
             // Reset form when modal is hidden
-            productModal.addEventListener('hidden.bs.modal', function() {
-                modalTitle.textContent = 'Add Product';
-                productForm.reset();
-                productForm.querySelector('input[name="action"]').value = 'create';
-                productForm.querySelector('input[name="id"]').value = '';
-                productForm.querySelector('input[name="images"]').value = '';
+            bannerModal.addEventListener('hidden.bs.modal', function() {
+                modalTitle.textContent = 'Add Banner';
+                bannerForm.reset();
+                bannerForm.querySelector('input[name="action"]').value = 'create';
+                bannerForm.querySelector('input[name="id"]').value = '';
+                bannerForm.querySelector('input[name="image"]').value = '';
                 imagePreview.style.display = 'none';
                 resetUploadArea();
                 imageInput.value = '';
             });
         });
+        
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
     </script>
 </body>
 </html>

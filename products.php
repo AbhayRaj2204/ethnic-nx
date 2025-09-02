@@ -1,10 +1,32 @@
-<?php require_once 'check-auth.php'; ?>
+<?php 
+require_once 'includes/meta-tags.php';
+
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+$isCrawler = preg_match('/bot|crawler|spider|facebook|twitter|linkedin|whatsapp/i', $userAgent);
+
+// Only require login for actual user interactions, not for crawlers
+if (!$isCrawler) {
+    require_once 'check-auth.php';
+} else {
+    // For crawlers, set minimal user data to prevent errors
+    $currentUser = ['first_name' => '', 'username' => 'Guest', 'email' => '', 'phone' => ''];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products - Ethnic NX</title>
+    
+    <?php 
+    generateMetaTags(
+        'Premium Ethnic Wear Collection | Products - Ethnic NX',
+        'Browse our premium collection of traditional ethnic wear. Find the perfect sherwani, kurta, or ethnic outfit with custom fitting and quality assurance.',
+        '/ethnic-nx/assets/images/logo.png'
+    );
+    ?>
+    
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +34,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <?php if ($isCrawler): ?>
+        <!-- Minimal content for crawlers to read meta tags -->
+        <div style="display: none;">
+            <h1>Premium Ethnic Wear Collection - Ethnic NX</h1>
+            <p>Browse our premium collection of traditional ethnic wear. Find the perfect sherwani, kurta, or ethnic outfit with custom fitting and quality assurance.</p>
+        </div>
+    <?php endif; ?>
+    
     <!-- Header -->
     <header class="header">
         <nav class="navbar">
@@ -57,9 +87,9 @@
                             <a href="profile.php" class="user-dropdown-item">
                                 <i class="fas fa-user-circle"></i> My Profile
                             </a>
-                            <a href="orders.php" class="user-dropdown-item">
+                            <!-- <a href="orders.php" class="user-dropdown-item">
                                 <i class="fas fa-shopping-bag"></i> My Orders
-                            </a>
+                            </a> -->
                             <a href="logout.php" class="user-dropdown-item">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
@@ -79,11 +109,11 @@
     <!-- Breadcrumb -->
     <section class="breadcrumb">
         <div class="container">
-            <nav class="breadcrumb-nav">
+            <!-- <nav class="breadcrumb-nav">
                 <a href="index.php">Home</a>
                 <span>/</span>
                 <span id="breadcrumb-category">Products</span>
-            </nav>
+            </nav> -->
         </div>
     </section>
 
@@ -147,9 +177,9 @@
 
     <!-- WhatsApp Float -->
     <div class="whatsapp-float">
-        <a href="https://wa.me/918153990102" target="_blank">
+        <a href="https://wa.me/9023386059" target="_blank">
             <i class="fab fa-whatsapp"></i>
-            <span>WhatsApp us</span>
+            <span class="whatsapp-text">WhatsApp us</span>
         </a>
     </div>
 
@@ -159,7 +189,7 @@
             <i class="fas fa-home"></i>
             <span>Shop</span>
         </div>
-        <div class="bottom-nav-item">
+         <div class="bottom-nav-item wishlist-bottom-nav">
             <i class="fas fa-heart"></i>
             <span>Wishlist</span>
             <span class="nav-badge">0</span>

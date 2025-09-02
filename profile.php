@@ -197,9 +197,9 @@
                             <a href="profile.php" class="user-dropdown-item active">
                                 <i class="fas fa-user-circle"></i> My Profile
                             </a>
-                            <a href="orders.php" class="user-dropdown-item">
+                            <!-- <a href="orders.php" class="user-dropdown-item">
                                 <i class="fas fa-shopping-bag"></i> My Orders
-                            </a>
+                            </a> -->
                             <a href="logout.php" class="user-dropdown-item">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
@@ -281,7 +281,7 @@
                     </div>
                 </div>
 
-                <div class="profile-actions">
+                <!-- <div class="profile-actions">
                     <a href="edit-profile.php" class="btn-profile btn-primary">
                         <i class="fas fa-edit"></i>
                         Edit Profile
@@ -294,7 +294,7 @@
                         <i class="fas fa-lock"></i>
                         Change Password
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

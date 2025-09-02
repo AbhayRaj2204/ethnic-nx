@@ -1,0 +1,354 @@
+/* Banner Slider Styles */
+.banner-slider {
+  position: relative;
+  width: 100%;
+  /* Made fullscreen height for laptop/desktop view */
+  height: 100vh;
+  overflow: hidden;
+  /* Added top margin to move slider down for better visibility */
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.banner-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* Added cursor styles for drag functionality */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.banner-container:active {
+  cursor: grabbing;
+}
+
+.banner-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.banner-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.banner-slide.active {
+  opacity: 1;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  /* Enhanced image fitting to ensure proper scaling and positioning */
+  object-fit: fill;
+  object-position: center;
+  display: block;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Updated banner content styles for dynamic admin content */
+.banner-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  max-width: 800px;
+  padding: 0 20px;
+  z-index: 5;
+  width: 100%;
+}
+
+.banner-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  line-height: 1.2;
+}
+
+.banner-subtitle {
+  font-size: 1.4rem;
+  margin-bottom: 2rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  opacity: 0.95;
+  font-weight: 400;
+}
+
+.banner-text {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.banner-btn {
+  display: inline-block;
+  padding: 15px 35px;
+  background: #e53e3e;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1rem;
+  box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+}
+
+.banner-btn:hover {
+  background: #dc2626;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(229, 62, 62, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+/* Navigation Arrows */
+.banner-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #333;
+  transition: all 0.3s ease;
+  z-index: 10;
+  /* Added pointer events and better visibility */
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.banner-nav:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.banner-nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.banner-prev {
+  left: 20px;
+}
+
+.banner-next {
+  right: 20px;
+}
+
+/* Dots Indicators */
+.banner-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.banner-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* Added pointer events for better click handling */
+  pointer-events: auto;
+}
+
+.banner-dot.active,
+.banner-dot:hover {
+  background: white;
+  transform: scale(1.2);
+}
+
+.banner-dot:active {
+  transform: scale(1.1);
+}
+
+/* Responsive Design */
+/* Added laptop/desktop specific styles for fullscreen */
+@media (min-width: 1024px) {
+  .banner-image {
+  width: 100%;
+  height: 85%;
+  margin-top: 90px;
+  /* Enhanced image fitting to ensure proper scaling and positioning */
+  object-fit: fill;
+  object-position: center;
+  display: block;
+}
+  .banner-slider {
+    height: 100vh;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .banner-title {
+    font-size: 4.5rem;
+  }
+
+  .banner-subtitle {
+    font-size: 1.6rem;
+  }
+
+  .banner-text {
+    font-size: 1.4rem;
+  }
+}
+
+/* Updated tablet view for better proportions */
+@media (max-width: 1023px) and (min-width: 769px) {
+  .banner-slider {
+    height: 500px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .banner-title {
+    font-size: 3rem;
+  }
+
+  .banner-subtitle {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner-slider {
+    height: 300px;
+    /* Reduced margins for mobile */
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .banner-content {
+    max-width: 90%;
+    padding: 0 15px;
+  }
+
+  .banner-title {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .banner-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .banner-text {
+    font-size: 1rem;
+  }
+
+  .banner-btn {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+
+  /* Navigation Arrows */
+  .banner-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .banner-prev {
+    left: 10px;
+  }
+
+  .banner-next {
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-slider {
+    height: 250px;
+    /* Minimal margins for small mobile */
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .banner-content {
+    max-width: 95%;
+    padding: 0 10px;
+  }
+
+  .banner-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .banner-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .banner-text {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .banner-btn {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+  }
+
+  /* Navigation Arrows */
+  .banner-nav {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+
+  .banner-prev {
+    left: 10px;
+  }
+
+  .banner-next {
+    right: 10px;
+  }
+
+  /* Dots Indicators */
+  .banner-dots {
+    bottom: 15px;
+  }
+
+  .banner-dot {
+    width: 10px;
+    height: 10px;
+  }
+}

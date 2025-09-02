@@ -12,70 +12,7 @@ class Product {
     
     private function initializeProducts() {
         $products = $this->db->read($this->filename);
-        if (empty($products)) {
-            $defaultProducts = [
-                [
-                    'id' => 1,
-                    'name' => 'Aurum Maroon Grace Rajwadi Koti Kurta Set',
-                    'slug' => 'aurum-maroon-grace-rajwadi-koti-kurta-set',
-                    'description' => 'Premium Rajwadi Koti Kurta Set in elegant maroon color with intricate handwork and premium fabric',
-                    'price' => '8500.00',
-                    'category_id' => 5,
-                    'sku' => 'ENX001',
-                    'stock' => 10,
-                    'status' => 'active',
-                    'featured' => 1,
-                    'images' => 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=350&h=350&fit=crop',
-                    'fabric' => 'Premium Silk',
-                    'occasion' => 'Wedding, Festival',
-                    'care_instructions' => 'Dry Clean Only',
-                    'sizes' => 'S,M,L,XL,XXL',
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Peela Grace Rajwadi Koti Kurta Set',
-                    'slug' => 'peela-grace-rajwadi-koti-kurta-set',
-                    'description' => 'Beautiful yellow Rajwadi Koti Kurta Set with traditional embroidery',
-                    'price' => '8500.00',
-                    'category_id' => 5,
-                    'sku' => 'ENX002',
-                    'stock' => 8,
-                    'status' => 'active',
-                    'featured' => 1,
-                    'images' => 'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=350&h=350&fit=crop',
-                    'fabric' => 'Premium Silk',
-                    'occasion' => 'Wedding, Festival',
-                    'care_instructions' => 'Dry Clean Only',
-                    'sizes' => 'S,M,L,XL,XXL',
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Royal Blue Sherwani Set',
-                    'slug' => 'royal-blue-sherwani-set',
-                    'description' => 'Elegant royal blue sherwani with matching churidar and dupatta',
-                    'price' => '12500.00',
-                    'category_id' => 1,
-                    'sku' => 'ENX003',
-                    'stock' => 5,
-                    'status' => 'active',
-                    'featured' => 1,
-                    'images' => 'https://images.unsplash.com/photo-1506629905607-d405872a4d86?w=350&h=350&fit=crop',
-                    'fabric' => 'Banarasi Silk',
-                    'occasion' => 'Wedding, Reception',
-                    'care_instructions' => 'Dry Clean Only',
-                    'sizes' => 'M,L,XL,XXL',
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ]
-            ];
-            
-            $headers = ['id', 'name', 'slug', 'description', 'price', 'category_id', 'sku', 'stock', 'status', 'featured', 'images', 'fabric', 'occasion', 'care_instructions', 'sizes', 'created_at', 'updated_at'];
-            $this->db->write($this->filename, $defaultProducts, $headers);
-        }
+      
     }
     
     public function getAll() {

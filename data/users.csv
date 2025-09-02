@@ -1,5 +1,4 @@
 id,username,email,password,role,status,first_name,last_name,phone,company,created_at
 2,admin,admin@ethnicnx.com,$2y$10$qsFFlKWKfgAZwbfxdGIccOj8/yJFNTz72.iT07d.yizPTXTL3mzJu,admin,active,Admin,User,,EthnicNX,"2025-08-05 09:08:08"
-3,user1,abhayraj3824@gmail.com,$2y$10$FmyTK2s4lNnGP5pVwo1UM.8IPYwMNFCAHz1qE.qNXcT39.f39cD3u,user,active,Abhay,Raj,08757717934,Student,"2025-08-05 16:47:46"
-4,ajay12,ajay@gmail.com,$2y$10$4Hax3Gf0LOyb24as8YIzGupkQD7BV8WBfM9wl4GNK7SfOHsaY39SK,user,active,Ajay,singh,1234567890,Student,"2025-08-06 21:52:12"
 5,adminn,admin@gmail.com,$2y$10$tRwlFy2X9h9F/BjLcMduuuLZWIS9WfVXMZRoHCYSMf5egqAxcgmBK,user,active,Admin,,1298754451,EthnicNX,"2025-08-06 23:03:19"
+6,swagat,swagat@gmail.com,$2y$10$9sjPrtE1r6Zxgfiad41nvuew2i8tkTeWjDF.FmWJ1kDpojA7fkHu6,user,active,swagat,,1234567890,swagat,"2025-08-12 12:19:34"

@@ -27,6 +27,14 @@
                 </a>
             </li>
             
+            <!-- Added banner management menu item -->
+            <li class="nav-item">
+                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'banners.php' ? 'active' : ''; ?>" href="banners.php">
+                    <i class="fas fa-images"></i>
+                    Banners
+                </a>
+            </li>
+            
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'users.php' ? 'active' : ''; ?>" href="users.php">
                     <i class="fas fa-users"></i>
